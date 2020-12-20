@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+ <meta charset="utf-8"/>
+    <title></title>
+    <script type="text/javascript" src="jquery-3.5.1.js"></script>
+</head>
+   <body>
+    <div>
+     Введите студента в следующем формате: Имя, Фамилия, возраст, средний бал <br>
+    <input type="text" id="StudentInput"> <input type="button" onclick="addStudent()" value="Добавить">
+    </div>
+  </body>
+  <script>
+    var file = "data.json";
+    var mas =[];
+
+    var jsFile = new XMLHttpRequest();
+    jsFile.overrideMimeType("application/json");
+
+    jsFile.onreadystatechange = function() {
+      if (jsFile.readyState == 4) {
+        mas = JSON.parse(jsFile.response);
+        tableInsert();
+        avgMarkModule().getAvgMark();
+      }
+    };
+    jsFile.open("GET", file, true);
+    jsFile.send();
+
+    function tableInsert() {
+      $("body")
+        .prepend($("<table>")
+          .append($("<tbody>")
+            .append($("<tr>").attr("id", "thead"))));
+      var table = $("tbody");
+      var keys = Object.keys(mas[0]);
+      var tr_count = mas.length;
+      var td_count = keys.length;
+      for(var i = 0; i < td_count; i++) {
+        $("#thead").append($("<td>").text(keys[i]));
+      }
+      $("#thead").append($("<td>").text("action"));
+      for(var i = 0; i < tr_count;i++){
+        table.append($("<tr></tr>"));
+      }
+      var trmas = $("tr");
+      for(var i = 1; i <= tr_count; i++){
+        for (var j = 0; j < td_count; j++){
+          trmas.eq(i).append($("<td>").text(mas[i-1][keys[j]]));
+        }
+        trmas.eq(i).append($("<td>"));
+        var tdmas = $("td", trmas.eq(i));
+        tdmas.eq(4).append($("<input>").attr("type", "button").attr("value", "Удалить").attr("onclick", `deleteTr(${i - 1})`));
+      }
+    };
+
+    var avgMarkModule = (function () {
+      var trmas = $("tr");
+      var sum = 0;
+
+      var countMark = function() {
+        var tr_count = trmas.length;
+        for(var i = 1; i <= tr_count; i++){
+          var tdmas = $("td", trmas.eq(i));
+          sum += Number(tdmas.eq(3).text());
+        }
+      }
+
+      var getAvgMark = function() {
+        countMark();
+        $("body").append($("<p>").attr("id", "avg_mark").text("Avg mark is: " + (sum/(trmas.length*1.0 - 1)).toFixed(2)));
+      }
+
+      return {
+        getAvgMark: getAvgMark
+      }
+    });
+
+    function changeAvgMark() {
+      tr_count = $("tr").length - 1;
+      sum = 0;
+      for(var i = 1; i <= tr_count; i++){
+        tdmas = trmas.eq(i).find("td");
+        sum += Number(tdmas.eq(3).text());
+      }
+    $("#avg_mark").text("Avg mark is: " + (sum/((tr_count)*1.0)).toFixed(2));
+    };
+
+    function addStudent() {
+      var keys = Object.keys(mas[0]);
+      var str = $("#StudentInput").val().split(", ");
+      var td_count = keys.length;
+      mas[mas.length] = {};
+      for (var j = 0; j < td_count; j++){
+        mas[mas.length-1][keys[j]]  = str[j];
+      }
+      $("tbody").append("<tr>");
+      trmas = $("tr");
+      for (var j = 0; j <= td_count; j++){
+        trmas.eq(trmas.length - 1).append($("<td>").text(str[j]));
+      }
+      tdmas = trmas.eq(trmas.length - 1).find("td");
+      var i = $("tr").length - 2;
+      tdmas.eq(4).append($("<input>").attr("type", "button").attr("value", "Удалить").attr("onclick", `deleteTr(${i})`));
+      changeAvgMark();
+      console.log(mas);
+    };
+
+    function deleteTr(i) {
+      $("tr").eq(i+1).remove();
+      mas.splice(i, 1);
+      var tr_count = $("tr").length;
+      var trmas = $("tr");
+      for (var j = 1; j < tr_count; j++){
+        var tdmas = trmas.eq(j).find("td");
+        tdmas.eq(4).find("input").attr("onclick",`deleteTr(${j - 1})`);
+      }
+      console.log(mas);
+    };
+
+  </script>
+</html>

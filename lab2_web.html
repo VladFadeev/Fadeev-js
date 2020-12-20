@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8"/>
+    <title></title>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td>Name</td>
+        <td>Surname</td>
+        <td>Age</td>
+        <td>Avg mark</td>
+      </tr>
+    </table>
+  </body>
+  <script>
+    var mas = [{name:"Ivan", surname: "Ivanov", age: 20, avg_mark: 8.5}, {name:"Petr", surname: "Petrov", age: 21, avg_mark: 7.5},
+               {name:"Ivan", surname: "Petrov", age: 28, avg_mark: 9.5}, {name:"Petr", surname: "Ivanov", age: 24, avg_mark: 5.7}, {name: "Igor", surname: "Ivanov", age: 18, avg_mark: 7.3}];
+    var table = document.querySelector("tbody");
+    var tr, td, trmas, tdmas;
+    var tr_count = mas.length;
+    var td_count = table.querySelectorAll("td").length;
+
+    function tableInsert() {
+      for(var i = 0; i<tr_count;i++){
+        tr = document.createElement("tr");
+        table.appendChild(tr);
+      }
+      trmas = table.querySelectorAll("tr");
+      for(var i = 1; i<=tr_count; i++){
+        for (var j = 0; j<td_count; j++){
+          td = document.createElement("td");
+          trmas[i].appendChild(td);
+        }
+        tdmas = trmas[i].querySelectorAll("td");
+        tdmas[0].textContent = mas[i-1].name;
+        tdmas[1].textContent = mas[i-1].surname;
+        tdmas[2].textContent = mas[i-1].age;
+        tdmas[3].textContent = mas[i-1].avg_mark;
+      }
+    }
+
+    tableInsert();
+
+    var avgMarkModule = (function () {
+      trmas = table.querySelectorAll("tr");
+      var sum = 0;
+
+      var countMark = function() {
+        for(var i = 1; i<=tr_count; i++){
+          tdmas = trmas[i].querySelectorAll("td");
+          sum += Number(tdmas[3].textContent);
+        }
+      }
+
+      var getAvgMark = function() {
+        countMark();
+        var p = document.createElement("p");
+        var body = document.querySelector("body");
+        body.appendChild(p);
+        p.textContent = "Avg mark is: " + sum/(tr_count*1.0);
+      }
+
+      return {
+        getAvgMark: getAvgMark
+      }
+    })();
+
+    avgMarkModule.getAvgMark();
+  </script>
+    </html>

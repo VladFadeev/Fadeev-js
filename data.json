@@ -1,0 +1,2 @@
+[{"name":"Ivan", "surname": "Ivanov", "age": 20, "avg_mark": 8.5}, {"name":"Petr", "surname": "Petrov", "age": 21, "avg_mark": 7.5},
+ {"name":"Ivan", "surname": "Petrov", "age": 28, "avg_mark": 9.5}, {"name":"Petr", "surname": "Ivanov", "age": 24, "avg_mark": 5.7}, {"name": "Igor", "surname": "Ivanov", "age": 18, "avg_mark": 7.3}]
