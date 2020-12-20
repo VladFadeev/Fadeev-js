@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" ng-app="tableApp">
+<head>
+<meta charset="utf-8"/>
+   <title></title>
+  <script src="angular-1.8.2/angular.min.js"></script>
+ </head>
+   <body ng-controller="tableCtrl">
+     <table>
+       <thead>
+         <td>Имя</td>
+         <td>Фамилия</td>
+         <td>Возраст</td>
+         <td>Средний бал</td>
+         <td>Редактировать/удалить</td>
+       </thead>
+       <tbody>
+        <tr ng-repeat="student in students">
+          <td>{{student.name}}</td>
+          <td>{{student.surname}}</td>
+          <td>{{student.age}}</td>
+          <td>{{student.avg_mark}}</td>
+          <td>
+            <input type="button" ng-click="actionMode($index)" value="Редактировать">
+            <input type="button" ng-click="deleteTr($index)" value="Удалить">
+          </td>
+        </tr>
+       </tbody>
+     </table>
+    <div>
+     Введите данные о студенте в следующем формате: Имя, Фамилия, возраст, средний бал <br>
+      <input type="text" id="StudentInput" ng-model="student"> <input type="button" ng-click="addStudent()" value="Добавить">
+    </div>
+    <p id="avg_mark">Средний балл: {{avgMarkModule().getAvgMark()}}</p>
+  </body>
+  <script>
+    var file = "data.json";
+
+    var tableApp = angular.module('tableApp', []);
+    tableApp.controller("tableCtrl", function($scope, $http) {
+      $scope.students = [];
+      $scope.mode = [];
+      $http.get(file).then(function success(response) {
+        $scope.students = response.data;
+        for (var i = 0; i < $scope.students.length;i++) {
+          $scope.mode[i] = 0;
+        }
+      });
+
+      $scope.avgMarkModule = (function () {
+        var trmas = angular.element(document.querySelector("tbody")).find("tr");
+        var sum = 0;
+
+        var countMark = function() {
+          var tr_count = trmas.length;
+          for(var i = 0; i < tr_count; i++){
+            var tdmas = trmas.eq(i).find("td");
+            sum += Number(tdmas.eq(3).text());
+          }
+        }
+
+        var getAvgMark = function() {
+          countMark();
+          angular.element(document.querySelector("#avg_mark")).text("Средний балл: " + (sum/(trmas.length*1.0)).toFixed(2));
+        }
+
+        return {
+          getAvgMark: getAvgMark
+        }
+      });
+
+      $scope.addStudent = function () {
+        var keys = Object.keys($scope.students[0]);
+        var str = $scope.student.split(", ");
+        var td_count = keys.length;
+        var temp = new Object();
+        for (var j = 0; j < td_count; j++){
+          temp[keys[j]] = str[j];
+        }
+        $scope.students.push(temp);
+        console.log($scope.students);
+      };
+
+$scope.actionMode = function(i) {
+  if($scope.mode[i] == 0 || $scope.mode[i] == undefined){
+    updateStudent(i);
+  } else {
+    saveStudent(i);
+  }
+};
+
+
+      function updateStudent(i) {
+        $scope.mode[i] = 1;
+        var tdmas = angular.element(document.querySelector("tbody")).find("tr").eq(i).find("td");
+        var keys = Object.keys($scope.students[0]);
+        for(var j = 0; j < tdmas.length - 1; j++) {
+          var temp = angular.element("<input>");
+          temp.val($scope.students[i][keys[j]]);
+          tdmas.eq(j).text("");
+          tdmas.eq(j).append(temp);
+        }
+        tdmas.eq(tdmas.length - 1).find("input").eq(0).val("Сохранить")
+      };
+
+      function saveStudent(i) {
+        $scope.mode[i] = 0;
+          var tdmas = angular.element(document.querySelector("tbody")).find("tr").eq(i).find("td");
+          var keys = Object.keys($scope.students[0]);
+          for(var j = 0; j < tdmas.length - 1; j++) {
+            $scope.students[i][keys[j]] = tdmas.eq(j).find("input").val();
+            tdmas.eq(j).find("input").remove();
+            tdmas.eq(j).text($scope.students[i][keys[j]]);
+          }
+          tdmas.eq(tdmas.length - 1).find("input").eq(0).val("Редактировать");
+      };
+
+      $scope.deleteTr = function (i) {
+        $scope.students.splice(i, 1);
+        console.log($scope.students);
+      };
+
+    });
+  </script>
+</html>
